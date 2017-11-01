@@ -1,16 +1,22 @@
 <!--<?xml version="1.0" encoding="utf-8"?>-->
-<!--<RelativeLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android" >-->
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="1dp"
+    android:background="#FFFFFF"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        xmlns:android="http://schemas.android.com/apk/res/android"/>
-    <!--<TextView-->
-        <!--android:id="@+id/body"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-<!--</RelativeLayout>-->
+        android:textSize="20dp"
+        android:textStyle="bold"
+    />
+    <TextView
+        android:id="@+id/body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

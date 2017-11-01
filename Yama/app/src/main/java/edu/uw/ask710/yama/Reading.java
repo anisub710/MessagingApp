@@ -23,6 +23,9 @@ public class Reading extends AppCompatActivity {
 
     public static final String COMPOSING_KEY = "compose";
     public static final String TAG = "Reading";
+    public ArrayAdapter<String> adapter;
+    public ArrayList<Message> messages;
+    public MessageAdapter msgadapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,16 +33,27 @@ public class Reading extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ArrayList<Message> messages = new ArrayList<Message>();
-        Message message = new Message("Test", "Hello", 0L);
-        messages.add(message);
+        messages = new ArrayList<Message>();
 
-        ArrayList<String> data = new ArrayList<String>();
-        data.add("Test");
-        Log.v(TAG, data.get(0));
-        ArrayAdapter adapter = new ArrayAdapter<String>(this, R.layout.reading_list_item, R.id.author, data);
-        AdapterView listView = (AdapterView)findViewById(R.id.list_view);
-        listView.setAdapter(adapter);
+        //test data
+        for(int i = 0; i < 100; i++){
+            Message message = new Message("Test", "Hello", 0L);
+            messages.add(message);
+        }
+
+        msgadapter = new MessageAdapter(messages);
+        RecyclerView list = (RecyclerView)findViewById(R.id.list_view);
+        list.setAdapter(msgadapter);
+
+//        ArrayList<String> data = new ArrayList<String>();
+//        data.add("Test");
+//        data.add("Test 2");
+//        Log.v(TAG, data.get(0));
+//        adapter = new ArrayAdapter<String>(this, R.layout.reading_list_item, R.id.txtItem, data);
+//
+//        AdapterView listView = (AdapterView)findViewById(R.id.list_view);
+//        listView.setAdapter(adapter);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -67,14 +81,13 @@ public class Reading extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId()){
+            case R.id.action_settings:
+                startActivity(new Intent(Reading.this, SettingsActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
@@ -97,7 +110,9 @@ public class Reading extends AppCompatActivity {
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.message = mValues.get(position);
             TextView author = (TextView) holder.mView.findViewById(R.id.author);
+            TextView body = (TextView) holder.mView.findViewById(R.id.body);
             author.setText(holder.message.author);
+            body.setText(holder.message.body);
 
 
         }

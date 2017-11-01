@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="edu.uw.ask710.yama.Reading">
@@ -20,39 +20,37 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <!--<android.support.v7.widget.RecyclerView-->
-        <!--android:id="@+id/list"-->
-        <!--android:scrollbars="vertical"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--/>-->
-    <FrameLayout
-        android:id="@+id/frameLayout"
+    <!--<include layout="@layout/list_view" />-->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list_view"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <ListView
-            android:id="@+id/list_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
-        </ListView>
-
-    </FrameLayout>
-
-
+        app:layoutManager="LinearLayoutManager"
+        android:background="#ECEFF1"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_compose_message"
         android:tint="@color/iconColor"/>
 
 
 
-    <!--<include layout="@layout/reading_list_item" />-->
+
 
 </android.support.design.widget.CoordinatorLayout>
+
+    <!--<ListView-->
+    <!--android:id="@+id/list_view"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+        <!--&gt;-->
+    <!--</ListView>-->
