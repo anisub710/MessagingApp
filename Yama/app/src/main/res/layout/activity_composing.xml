@@ -15,11 +15,31 @@
         android:text="Contacts"
         android:backgroundTint="@color/colorAccent"
         android:textColor="#FFFFFF"/>
+
     <TextView
         android:id="@+id/number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20dp"
         />
-
+    <TextView
+        android:id="@+id/send_message_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter message: "/>
+    <EditText
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:lines="3"
+        android:gravity="top"
+        />
+    <Button
+        android:id="@+id/send"
+        android:text="Send"
+        android:backgroundTint="@color/colorAccent"
+        android:textColor="#FFFFFF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>
