@@ -3,6 +3,9 @@
     package="edu.uw.ask710.yama">
 
     <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_yama_launcher"
@@ -34,6 +37,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Reading"/>
         </activity>
+
+        <receiver android:name=".MessageReceiver">
+            <intent-filter>
+                <action android:name="Composing.ACTION_SMS_STATUS"/>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 

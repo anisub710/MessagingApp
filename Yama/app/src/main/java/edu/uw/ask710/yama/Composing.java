@@ -1,5 +1,7 @@
 package edu.uw.ask710.yama;
 
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,6 +20,7 @@ public class Composing extends AppCompatActivity {
 
     public static final int REQUEST_SELECT_PHONE_NUMBER = 1;
     public static final String TAG = "Composing";
+    public static final String ACTION_SMS_STATUS = "edu.uw.ask710.yama.ACTION_SMS_STATUS";
     private String number;
 
     @Override
@@ -51,16 +54,15 @@ public class Composing extends AppCompatActivity {
 
     public void sendMessage(){
         if(number != null){
-            try {
-                EditText msg = (EditText) findViewById(R.id.message);
-                String message = msg.getText().toString();
-                SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(number, null, message, null, null);
-                Toast.makeText(Composing.this, "SMS successfully sent!", Toast.LENGTH_LONG).show();
-            }catch (Exception e){
-                Log.v(TAG, e.toString());
-                Toast.makeText(Composing.this, "SMS failed to send", Toast.LENGTH_LONG).show();
-            }
+            EditText msg = (EditText) findViewById(R.id.message);
+            String message = msg.getText().toString();
+
+            Intent intent = new Intent(ACTION_SMS_STATUS);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(Composing.this, 0, intent, 0);
+
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(number, null, message, pendingIntent, null);
+
         }
     }
 

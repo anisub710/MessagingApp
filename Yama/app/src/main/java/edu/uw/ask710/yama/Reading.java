@@ -1,9 +1,15 @@
 package edu.uw.ask710.yama;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +25,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class Reading extends AppCompatActivity {
+public class Reading extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     public static final String COMPOSING_KEY = "compose";
     public static final String TAG = "Reading";
@@ -36,23 +42,38 @@ public class Reading extends AppCompatActivity {
         messages = new ArrayList<Message>();
 
         //test data
-        for(int i = 0; i < 100; i++){
-            Message message = new Message("Test", "Hello", 0L);
-            messages.add(message);
+//        for(int i = 0; i < 100; i++){
+//            Message message = new Message("Test", "Hello", 0L);
+//            messages.add(message);
+//        }
+
+        getSupportLoaderManager().initLoader(0, null, this);
+        Uri inboxUri = Telephony.Sms.Inbox.CONTENT_URI;
+        String[] projection = new String[]{
+                Telephony.Sms.Inbox.ADDRESS,
+                Telephony.Sms.Inbox.BODY,
+                Telephony.Sms.Inbox.DATE
+        };
+        Cursor cursor = getContentResolver().query(inboxUri, projection, null, null, null);
+        if(cursor != null){
+            messages.clear();
+            while(cursor.moveToNext()){
+                String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                String body = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
+                Log.v(TAG, "Amazing stuff " +  address + " " + body);
+                Message message = new Message(address, body, date);
+                messages.add(message);
+            }
+
+//            while(cursor.moveToNext()){
+//
+//            }
         }
 
         msgadapter = new MessageAdapter(messages);
         RecyclerView list = (RecyclerView)findViewById(R.id.list_view);
         list.setAdapter(msgadapter);
-
-//        ArrayList<String> data = new ArrayList<String>();
-//        data.add("Test");
-//        data.add("Test 2");
-//        Log.v(TAG, data.get(0));
-//        adapter = new ArrayAdapter<String>(this, R.layout.reading_list_item, R.id.txtItem, data);
-//
-//        AdapterView listView = (AdapterView)findViewById(R.id.list_view);
-//        listView.setAdapter(adapter);
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -63,8 +84,6 @@ public class Reading extends AppCompatActivity {
                 intent.putExtra(COMPOSING_KEY, "test");
 
                 startActivity(intent);
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
             }
         });
     }
@@ -90,6 +109,42 @@ public class Reading extends AppCompatActivity {
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri inboxUri = Telephony.Sms.Inbox.CONTENT_URI;
+        String[] projection = new String[]{
+                Telephony.Sms.Inbox.ADDRESS,
+                Telephony.Sms.Inbox.BODY,
+                Telephony.Sms.Inbox.DATE
+        };
+        CursorLoader loader = new CursorLoader(this,inboxUri, projection, null, null, null);
+        return loader;
+    }
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if(cursor != null){
+            messages.clear();
+            while(cursor.moveToNext()){
+                String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                String body = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
+                Log.v(TAG, "Amazing stuff " +  address + " " + body);
+                Message message = new Message(address, body, date);
+                messages.add(message);
+            }
+
+        }
+        msgadapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        msgadapter.clear();
+    }
+
+
+    //MESSAGE ADAPTER
+
     public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
         private final ArrayList<Message> mValues;
@@ -111,10 +166,10 @@ public class Reading extends AppCompatActivity {
             holder.message = mValues.get(position);
             TextView author = (TextView) holder.mView.findViewById(R.id.author);
             TextView body = (TextView) holder.mView.findViewById(R.id.body);
+            TextView date = (TextView) holder.mView.findViewById(R.id.date);
             author.setText(holder.message.author);
             body.setText(holder.message.body);
-
-
+            date.setText(holder.message.getDate());
         }
 
         @Override
