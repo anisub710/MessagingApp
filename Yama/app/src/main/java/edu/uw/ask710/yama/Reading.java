@@ -1,13 +1,21 @@
 package edu.uw.ask710.yama;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.provider.Telephony;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -29,7 +37,8 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
 
     public static final String COMPOSING_KEY = "compose";
     public static final String TAG = "Reading";
-    public ArrayAdapter<String> adapter;
+
+
     public ArrayList<Message> messages;
     public MessageAdapter msgadapter;
     @Override
@@ -40,12 +49,6 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
         setSupportActionBar(toolbar);
 
         messages = new ArrayList<Message>();
-
-        //test data
-//        for(int i = 0; i < 100; i++){
-//            Message message = new Message("Test", "Hello", 0L);
-//            messages.add(message);
-//        }
 
         getSupportLoaderManager().initLoader(0, null, this);
         Uri inboxUri = Telephony.Sms.Inbox.CONTENT_URI;
@@ -66,9 +69,6 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
                 messages.add(message);
             }
 
-//            while(cursor.moveToNext()){
-//
-//            }
         }
 
         msgadapter = new MessageAdapter(messages);
@@ -108,6 +108,7 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
                 return super.onOptionsItemSelected(item);
         }
     }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
