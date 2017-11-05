@@ -48,6 +48,14 @@ public class Composing extends AppCompatActivity {
                 }
             });
 
+            if(getIntent().getStringExtra(MessageReceiver.NOTIFICATION_REPLY) != null){
+                number = getIntent().getStringExtra(MessageReceiver.NOTIFICATION_REPLY);
+                TextView text = (TextView)findViewById(R.id.number);
+                text.setText("Chosen number: " + number);
+                Log.v(TAG, "Here it is " + number);
+
+            }
+
 
         }
     }
@@ -57,13 +65,23 @@ public class Composing extends AppCompatActivity {
             EditText msg = (EditText) findViewById(R.id.message);
             String message = msg.getText().toString();
 
-            Intent intent = new Intent(ACTION_SMS_STATUS);
+            Intent intent = new Intent();
+            intent.setAction(ACTION_SMS_STATUS);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(Composing.this, 0, intent, 0);
 
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(number, null, message, pendingIntent, null);
+            clearInput();
 
         }
+    }
+
+    public void clearInput(){
+        number = null;
+        EditText editText = (EditText)findViewById(R.id.message);
+        editText.setText("");
+        TextView text = (TextView)findViewById(R.id.number);
+        text.setText("");
     }
 
     public void selectContact(){
@@ -83,11 +101,11 @@ public class Composing extends AppCompatActivity {
             if(cursor != null && cursor.moveToFirst()){
                 int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                 number = cursor.getString(numberIndex);
-                TextView text = (TextView)findViewById(R.id.number);
-                text.setText("Chosen number: " + number);
-                Log.v(TAG, "Here it is " + number);
-
             }
         }
+        TextView text = (TextView)findViewById(R.id.number);
+        text.setText("Chosen number: " + number);
+        Log.v(TAG, "Here it is " + number);
+
     }
 }

@@ -26,15 +26,17 @@ public class MessageReceiver extends BroadcastReceiver{
     private static final String NOTIFICATION_CHANNEL_ID = "my_channel_01";
     private static final int PENDING_ID = 1;
     private static final int NOTIFICATION_ID = 2;
+    public static final String NOTIFICATION_REPLY = "reply";
     @Override
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction() == Composing.ACTION_SMS_STATUS) {
+            Log.v(TAG, "Sending SMS Status");
             if(getResultCode() == Activity.RESULT_OK){
-                Toast.makeText(context, "Message sent!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Message sent!", Toast.LENGTH_LONG).show();
             }else{
-                Toast.makeText(context, "Error sending message", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Error sending message", Toast.LENGTH_LONG).show();
             }
-        }if(intent.getExtras() != null){ //receiving messages
+        }else if(intent.getExtras() != null){ //receiving messages
             SmsMessage[] otherMessages = getMessagesFromIntent(intent);
             for(int i = 0; i < otherMessages.length; i++){
                 String oldNumber = otherMessages[i].getDisplayOriginatingAddress();
@@ -45,6 +47,8 @@ public class MessageReceiver extends BroadcastReceiver{
 
         }
     }
+
+
     public void showNotification(Context context, String number, String message){
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context) //NOTIFICATION_CHANNEL_ID
@@ -62,13 +66,26 @@ public class MessageReceiver extends BroadcastReceiver{
         mBuilder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
 
 //        }
+
         Intent resultIntent = new Intent(context, Reading.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(Reading.class);
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(PENDING_ID,
                 PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //If preference **not** set to auto-reply
+        Intent replyIntent = new Intent(context, Composing.class);
+        replyIntent.putExtra(NOTIFICATION_REPLY, number);
+        stackBuilder.addNextIntent(replyIntent);
+        PendingIntent repiIntent = stackBuilder.getPendingIntent(PENDING_ID + 1, PendingIntent.FLAG_UPDATE_CURRENT);
+
         mBuilder.setContentIntent(pendingIntent);
+        mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+        mBuilder.addAction(0, "View", pendingIntent);
+        mBuilder.addAction(0, "Reply", repiIntent);
+        mBuilder.setAutoCancel(true);
+
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
 

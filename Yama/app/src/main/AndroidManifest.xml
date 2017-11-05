@@ -40,8 +40,10 @@
 
         <receiver android:name=".MessageReceiver">
             <intent-filter>
-                <action android:name="Composing.ACTION_SMS_STATUS"/>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="edu.uw.ask710.yama.ACTION_SMS_STATUS"/>
             </intent-filter>
         </receiver>
 
