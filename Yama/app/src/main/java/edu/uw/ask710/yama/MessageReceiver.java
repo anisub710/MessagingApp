@@ -1,15 +1,21 @@
 package edu.uw.ask710.yama;
 
 import android.app.Activity;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,6 +33,7 @@ public class MessageReceiver extends BroadcastReceiver{
     private static final int PENDING_ID = 1;
     private static final int NOTIFICATION_ID = 2;
     public static final String NOTIFICATION_REPLY = "reply";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction() == Composing.ACTION_SMS_STATUS) {
@@ -42,11 +49,25 @@ public class MessageReceiver extends BroadcastReceiver{
                 String oldNumber = otherMessages[i].getDisplayOriginatingAddress();
                 String oldMessage = otherMessages[i].getDisplayMessageBody();
                 Log.v(TAG, "This is working here: " + oldNumber + " " + oldMessage);
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+                if(prefs.getBoolean("pref_auto_reply", true)){
+                    String autoMessage = prefs.getString("pref_reply", null);
+                    Intent sendIntent = new Intent();
+                    intent.setAction(Composing.ACTION_SMS_STATUS);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(oldNumber, null, autoMessage, pendingIntent, null);
+//                    Log.v(TAG, "Heyyyy it's true: " + autoMessage);
+                }
+
                 showNotification(context, oldNumber, oldMessage);
             }
 
         }
     }
+
 
 
     public void showNotification(Context context, String number, String message){
@@ -74,17 +95,20 @@ public class MessageReceiver extends BroadcastReceiver{
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(PENDING_ID,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //If preference **not** set to auto-reply
-        Intent replyIntent = new Intent(context, Composing.class);
-        replyIntent.putExtra(NOTIFICATION_REPLY, number);
-        stackBuilder.addNextIntent(replyIntent);
-        PendingIntent repiIntent = stackBuilder.getPendingIntent(PENDING_ID + 1, PendingIntent.FLAG_UPDATE_CURRENT);
-
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
         mBuilder.addAction(0, "View", pendingIntent);
-        mBuilder.addAction(0, "Reply", repiIntent);
         mBuilder.setAutoCancel(true);
+
+        //If preference **not** set to auto-reply
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if(!(prefs.getBoolean("pref_auto_reply", true))){
+            Intent replyIntent = new Intent(context, Composing.class);
+            replyIntent.putExtra(NOTIFICATION_REPLY, number);
+            stackBuilder.addNextIntent(replyIntent);
+            PendingIntent repiIntent = stackBuilder.getPendingIntent(PENDING_ID + 1, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.addAction(0, "Reply", repiIntent);
+        }
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mBuilder.build());

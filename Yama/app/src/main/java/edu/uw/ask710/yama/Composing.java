@@ -1,11 +1,18 @@
 package edu.uw.ask710.yama;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -22,6 +29,7 @@ public class Composing extends AppCompatActivity {
     public static final String TAG = "Composing";
     public static final String ACTION_SMS_STATUS = "edu.uw.ask710.yama.ACTION_SMS_STATUS";
     private String number;
+    public static final int SEND_REQUEST = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,33 +38,52 @@ public class Composing extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.activity_composing);
-        if (savedInstanceState == null) {
 
-//            String result  = getIntent().getStringExtra(Reading.COMPOSING_KEY);
-            Button contact = (Button)findViewById(R.id.contact);
-            contact.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    selectContact();
+        if (savedInstanceState == null) {
+            int sendPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
+
+            if(sendPermission == PackageManager.PERMISSION_GRANTED){
+                Log.v(TAG, "Send permission granted");
+                Button contact = (Button)findViewById(R.id.contact);
+                contact.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        selectContact();
+                    }
+                });
+                Button send = (Button) findViewById(R.id.send);
+                send.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        sendMessage();
+                    }
+                });
+
+                if(getIntent().getStringExtra(MessageReceiver.NOTIFICATION_REPLY) != null){
+                    number = getIntent().getStringExtra(MessageReceiver.NOTIFICATION_REPLY);
+                    TextView text = (TextView)findViewById(R.id.number);
+                    text.setText("Chosen number: " + number);
+                    Log.v(TAG, "Here it is " + number);
+
                 }
-            });
-            Button send = (Button) findViewById(R.id.send);
-            send.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            }else{
+                Log.v(TAG, "Permission denied");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, SEND_REQUEST);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode){
+            case SEND_REQUEST: {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     sendMessage();
                 }
-            });
-
-            if(getIntent().getStringExtra(MessageReceiver.NOTIFICATION_REPLY) != null){
-                number = getIntent().getStringExtra(MessageReceiver.NOTIFICATION_REPLY);
-                TextView text = (TextView)findViewById(R.id.number);
-                text.setText("Chosen number: " + number);
-                Log.v(TAG, "Here it is " + number);
-
+                break;
             }
-
-
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
