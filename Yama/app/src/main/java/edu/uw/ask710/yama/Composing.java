@@ -22,7 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
+//Handles sending messages.
 public class Composing extends AppCompatActivity {
 
     public static final int REQUEST_SELECT_PHONE_NUMBER = 1;
@@ -40,6 +40,7 @@ public class Composing extends AppCompatActivity {
         setContentView(R.layout.activity_composing);
 
         if (savedInstanceState == null) {
+            //check permission for sending messages
             int sendPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
 
             if(sendPermission == PackageManager.PERMISSION_GRANTED){
@@ -73,6 +74,7 @@ public class Composing extends AppCompatActivity {
         }
     }
 
+    //if permission denied, ask permission again.
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode){
@@ -87,6 +89,7 @@ public class Composing extends AppCompatActivity {
         }
     }
 
+    //sends message taking message from edittext area and number chosen from contacts.
     public void sendMessage(){
         if(number != null){
             EditText msg = (EditText) findViewById(R.id.message);
@@ -103,6 +106,7 @@ public class Composing extends AppCompatActivity {
         }
     }
 
+    //clears input fields after the message is sent.
     public void clearInput(){
         number = null;
         EditText editText = (EditText)findViewById(R.id.message);
@@ -111,6 +115,7 @@ public class Composing extends AppCompatActivity {
         text.setText("");
     }
 
+    //allows to select contact from contacts app.
     public void selectContact(){
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
@@ -119,6 +124,7 @@ public class Composing extends AppCompatActivity {
         }
     }
 
+    //get number from selected contact.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_SELECT_PHONE_NUMBER && resultCode == RESULT_OK){
@@ -132,7 +138,5 @@ public class Composing extends AppCompatActivity {
         }
         TextView text = (TextView)findViewById(R.id.number);
         text.setText("Chosen number: " + number);
-        Log.v(TAG, "Here it is " + number);
-
     }
 }

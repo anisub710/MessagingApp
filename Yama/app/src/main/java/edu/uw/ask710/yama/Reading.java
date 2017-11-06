@@ -6,11 +6,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.support.annotation.NonNull;
@@ -38,6 +40,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+//handles reading messages and updating new messages
 public class Reading extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     public static final String COMPOSING_KEY = "compose";
@@ -47,6 +50,8 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
 
     public ArrayList<Message> messages;
     public MessageAdapter msgadapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,8 +60,14 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
         setSupportActionBar(toolbar);
 
         messages = new ArrayList<Message>();
+        //set default value when the app loads.
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(!sharedPrefs.getBoolean("pref_auto_reply", false)){
+            sharedPrefs.edit().putBoolean("pref_auto_reply", false).commit();
+        }
 
-        //SEND_SMS permission in Composing.java
+        //check read and receive sms permissions
+        //SEND_SMS permission is checked in Composing.java
         int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS);
         int receivePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS);
         if(readPermission == PackageManager.PERMISSION_GRANTED && receivePermission == PackageManager.PERMISSION_GRANTED){
@@ -67,8 +78,7 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS}, READ_REQUEST);
         }
 
-
-
+        //take user to compose new message
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,7 +91,8 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
         });
     }
 
-
+// loads messages (author, body and date) from cursor, initializes loader and sets messages to
+// recyclerview.
     public void loadMessages(){
         getSupportLoaderManager().initLoader(0, null, this);
         Uri inboxUri = Telephony.Sms.Inbox.CONTENT_URI;
@@ -97,7 +108,6 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
                 String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
                 String body = cursor.getString(cursor.getColumnIndexOrThrow("body"));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
-//                Log.v(TAG, "Amazing stuff " +  address + " " + body);
                 Message message = new Message(address, body, date);
                 messages.add(message);
             }
@@ -109,6 +119,7 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
         list.setAdapter(msgadapter);
     }
 
+    //if permission denied, asks permission again
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode){
@@ -127,13 +138,15 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
+    //opens new setting activity when settings is selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
+        // Handles settings option. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch(item.getItemId()){
@@ -146,6 +159,7 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
     }
 
 
+    //returns loader with messages.
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri inboxUri = Telephony.Sms.Inbox.CONTENT_URI;
@@ -157,6 +171,8 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
         CursorLoader loader = new CursorLoader(this,inboxUri, projection, null, null, null);
         return loader;
     }
+
+    //queries through messages and gets messages (address, body and date) and sets recyclerview.
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if(cursor != null){
@@ -165,7 +181,6 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
                 String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
                 String body = cursor.getString(cursor.getColumnIndexOrThrow("body"));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
-                Log.v(TAG, "Amazing stuff " +  address + " " + body);
                 Message message = new Message(address, body, date);
                 messages.add(message);
             }
@@ -174,14 +189,14 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
         msgadapter.notifyDataSetChanged();
     }
 
+    //clears previous messages with updated ones.
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         msgadapter.clear();
     }
 
 
-    //MESSAGE ADAPTER
-
+//custom recyclerviewadapter to display messages.
     public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
         private final ArrayList<Message> mValues;
@@ -197,7 +212,7 @@ public class Reading extends AppCompatActivity implements LoaderManager.LoaderCa
             return new ViewHolder(view);
         }
 
-        //sets up cards and sets onclicklisteners on each card.
+        //sets up each message in the recycler view
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.message = mValues.get(position);

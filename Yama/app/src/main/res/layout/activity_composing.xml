@@ -12,28 +12,35 @@
         android:id="@+id/contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Contacts"
+        android:text="Choose Contact"
         android:backgroundTint="@color/colorAccent"
+        android:contentDescription="@string/contact"
         android:textColor="#FFFFFF"/>
 
     <TextView
         android:id="@+id/number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20dp"
+        android:textSize="18sp"
         />
+
     <TextView
         android:id="@+id/send_message_head"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter message: "/>
+        android:text="Enter message: "
+        android:textSize="18sp"
+        />
+
     <EditText
         android:id="@+id/message"
+        android:textSize="14sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"
-        android:lines="3"
+        android:lines="5"
         android:gravity="top"
+        android:contentDescription="@string/write_message"
         />
     <Button
         android:id="@+id/send"
@@ -41,5 +48,7 @@
         android:backgroundTint="@color/colorAccent"
         android:textColor="#FFFFFF"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/send_button"
+        />
 </LinearLayout>

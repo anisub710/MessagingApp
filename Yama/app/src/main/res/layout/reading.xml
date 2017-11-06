@@ -20,7 +20,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <!--<include layout="@layout/list_view" />-->
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_view"
         android:layout_marginTop="?android:attr/actionBarSize"
@@ -40,17 +39,8 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_compose_message"
+        android:contentDescription="@string/go_to_compose"
         android:tint="@color/iconColor"/>
 
 
-
-
-
 </android.support.design.widget.CoordinatorLayout>
-
-    <!--<ListView-->
-    <!--android:id="@+id/list_view"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-        <!--&gt;-->
-    <!--</ListView>-->

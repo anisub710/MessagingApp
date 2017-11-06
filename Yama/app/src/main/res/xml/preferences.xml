@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="my_preferences">
 
     <SwitchPreference android:key="pref_auto_reply"
-        android:title="Enable auto reply"
+        android:title="Enable auto-reply"
         android:defaultValue="false"
+        android:textSize="18sp"
     />
     <EditTextPreference android:key="pref_reply"
-        android:title="Auto reply text"
+        android:title="Text for auto-reply"
         android:defaultValue="@string/default_text"
+        android:textSize="18sp"
     />
 
 </PreferenceScreen>

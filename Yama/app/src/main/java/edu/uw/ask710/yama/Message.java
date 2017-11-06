@@ -7,6 +7,7 @@ import java.util.Date;
  * Created by Anirudh Subramanyam on 10/31/2017.
  */
 
+//custom class to store messages with author, body and date.
 public class Message {
 
     public String author = "";

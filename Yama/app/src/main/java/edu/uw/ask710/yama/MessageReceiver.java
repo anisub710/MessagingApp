@@ -20,12 +20,14 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.provider.Telephony.Sms.Intents.getMessagesFromIntent;
 
 /**
  * Created by Anirudh Subramanyam on 11/2/2017.
  */
 
+//custom BrodcastReceiver for sending and receiving messages
 public class MessageReceiver extends BroadcastReceiver{
 
     public static final String TAG = "RECEIVER";
@@ -33,33 +35,34 @@ public class MessageReceiver extends BroadcastReceiver{
     private static final int PENDING_ID = 1;
     private static final int NOTIFICATION_ID = 2;
     public static final String NOTIFICATION_REPLY = "reply";
+    public static final String PREFERENCE_KEY = "my_preferences";
 
+    //Checks if message is sent and receives new messages (based on pending intent)
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(intent.getAction() == Composing.ACTION_SMS_STATUS) {
+        if(intent.getAction() == Composing.ACTION_SMS_STATUS) { //check if message is sent or not.
             Log.v(TAG, "Sending SMS Status");
             if(getResultCode() == Activity.RESULT_OK){
                 Toast.makeText(context, "Message sent!", Toast.LENGTH_LONG).show();
             }else{
                 Toast.makeText(context, "Error sending message", Toast.LENGTH_LONG).show();
             }
-        }else if(intent.getExtras() != null){ //receiving messages
+        }else if(intent.getExtras() != null){ //receiving new messages
             SmsMessage[] otherMessages = getMessagesFromIntent(intent);
             for(int i = 0; i < otherMessages.length; i++){
                 String oldNumber = otherMessages[i].getDisplayOriginatingAddress();
                 String oldMessage = otherMessages[i].getDisplayMessageBody();
-                Log.v(TAG, "This is working here: " + oldNumber + " " + oldMessage);
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-                if(prefs.getBoolean("pref_auto_reply", true)){
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                if(prefs.getBoolean("pref_auto_reply", true)){// auto reply if enabled in preferences.
+//                    Log.v(TAG, "Working after changing");
                     String autoMessage = prefs.getString("pref_reply", null);
                     Intent sendIntent = new Intent();
-                    intent.setAction(Composing.ACTION_SMS_STATUS);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+                    sendIntent.setAction(Composing.ACTION_SMS_STATUS);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, sendIntent, 0);
 
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(oldNumber, null, autoMessage, pendingIntent, null);
-//                    Log.v(TAG, "Heyyyy it's true: " + autoMessage);
                 }
 
                 showNotification(context, oldNumber, oldMessage);
@@ -69,14 +72,17 @@ public class MessageReceiver extends BroadcastReceiver{
     }
 
 
-
-    public void showNotification(Context context, String number, String message){
+// shows notifications for new messages based on preferences.
+    public static void showNotification(Context context, String number, String message){
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context) //NOTIFICATION_CHANNEL_ID
+                new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_new_message)
                         .setContentTitle(number)
                         .setContentText(message)
-                        .setChannel(NOTIFICATION_CHANNEL_ID);
+                        .setChannel(NOTIFICATION_CHANNEL_ID)
+                        .setAutoCancel(true);
+
+        //for Oreo if needed.
 //        if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.0){
 //            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "Demo channel", NotifactionManager.IMPORTANCE_HIGH);
 //            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -98,7 +104,6 @@ public class MessageReceiver extends BroadcastReceiver{
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
         mBuilder.addAction(0, "View", pendingIntent);
-        mBuilder.setAutoCancel(true);
 
         //If preference **not** set to auto-reply
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
